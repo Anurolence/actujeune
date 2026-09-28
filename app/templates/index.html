@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actujeune - Actualités & Opportunités de la Jeunesse Camerounaise 🇨🇲</title>
+  <meta name="description" content="Plateforme d'information, d'opportunités, concours et bourses de la jeunesse camerounaise dans les 10 régions du Cameroun.">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/images/icon.svg">
+</head>
+<body>
+
+  <!-- Cameroon Flag Tricolor Top Banner -->
+  <div class="flag-banner">
+    <div class="green"></div>
+    <div class="red"></div>
+    <div class="yellow"></div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand-wrapper" title="Actujeune - La Voix de la Jeunesse 237">
+        <img src="/static/images/logo.svg" alt="Actujeune 🇨🇲" style="height: 46px; width: auto; max-width: 220px;" />
+      </a>
+
+      <div class="nav-actions">
+        <!-- Dark Mode Toggle -->
+        <button id="btnThemeToggle" class="btn-theme-toggle" aria-label="Mode sombre / clair" title="Mode sombre / clair">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <!-- Low Data Mode Toggle (Economie Forfait Mo pour le Cameroun) -->
+        <button id="btnDataSaver" class="btn-data-saver" title="Économiser la consommation de forfait internet">
+          <span>📶</span>
+          <span data-i18n="dataSaverToggle">Mode Éco (Mo)</span>
+        </button>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button id="btnLangFr" class="lang-btn active">FR</button>
+          <button id="btnLangEn" class="lang-btn">EN</button>
+        </div>
+
+        <!-- Post Update Button -->
+        <button class="btn-primary" onclick="openCreateModal()">
+          <span data-i18n="postNewBtn">+ Publier une opportunité</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-pattern"></div>
+    <div class="hero-container">
+      <div class="hero-pill">
+        <span>🇨🇲</span>
+        <span>Cameroun 2035 &middot; Le Fer de Lance de la Nation</span>
+      </div>
+      <h2 data-i18n="heroTitle">Bâtir l'Avenir du Cameroun avec sa Jeunesse 🇨🇲</h2>
+      <p data-i18n="heroSubtitle">Plateforme citoyenne pour s'informer des concours, bourses d'études, startups, offres et réussites des jeunes des dix régions du Cameroun.</p>
+
+      <!-- Useful National Hotline & Guichet Badge -->
+      <div style="margin-bottom: 1.5rem; display: inline-flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+        <span style="background: white; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">
+          📞 <strong>N° Vert CNJC Jeunesse : +237672459956</strong> (Appel gratuit)
+        </span>
+        <span style="background: white; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: var(--radius-full); font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">
+          💬 Partage direct sur les groupes WhatsApp
+        </span>
+      </div>
+
+      <!-- Stats Strip -->
+      <div class="stats-strip">
+        <div class="stat-item">
+          <span class="stat-num" id="statPostsCount">7</span>
+          <span class="stat-label" data-i18n="statPosts">Opportunités & Actus</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="statViewsCount">3,820</span>
+          <span class="stat-label" data-i18n="statViews">Lectures Jeunesse</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="statLikesCount">510</span>
+          <span class="stat-label" data-i18n="statLikes">J'aime & Soutiens</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="statCommentsCount">28</span>
+          <span class="stat-label" data-i18n="statComments">Réactions</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content & Filters -->
+  <main class="main-wrapper">
+    <div class="filter-toolbar">
+      <!-- Search Input -->
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Rechercher un concours, une bourse, un mot-clé (ex: ENS, Buea, MoMo, Douala)..." data-i18n-placeholder="searchPlaceholder">
+      </div>
+
+      <!-- Filters & Sorting Row -->
+      <div class="filters-row">
+        <div class="filters-group">
+          <!-- Opportunity Type Filter -->
+          <select id="oppTypeSelect" class="select-custom">
+            <option value="all" data-i18n="allOppTypes">Tous types d'opportunités</option>
+            <option value="concours" data-i18n="oppTypeConcours">Concours Grandes Écoles</option>
+            <option value="bourse" data-i18n="oppTypeBourse">Bourses & Financements</option>
+            <option value="emploi_stage" data-i18n="oppTypeEmploi">Stages, Emplois & Hackathons</option>
+            <option value="story" data-i18n="oppTypeStory">Success Stories & Actualités</option>
+          </select>
+
+          <!-- Region Filter -->
+          <select id="regionSelect" class="select-custom">
+            <option value="all" data-i18n="allRegions">Toutes les régions</option>
+            <option value="Centre (Yaoundé)">Centre (Yaoundé)</option>
+            <option value="Littoral (Douala)">Littoral (Douala)</option>
+            <option value="Sud-Ouest (Buea)">Sud-Ouest (Buea)</option>
+            <option value="Ouest (Bafoussam)">Ouest (Bafoussam)</option>
+            <option value="Nord (Garoua)">Nord (Garoua)</option>
+            <option value="Extrême-Nord (Maroua)">Extrême-Nord (Maroua)</option>
+            <option value="Adamaoua (Ngaoundéré)">Adamaoua (Ngaoundéré)</option>
+            <option value="Nord-Ouest (Bamenda)">Nord-Ouest (Bamenda)</option>
+            <option value="Sud (Ebolowa)">Sud (Ebolowa)</option>
+            <option value="Est (Bertoua)">Est (Bertoua)</option>
+            <option value="National">National (Tout le Cameroun)</option>
+          </select>
+
+          <!-- Hidden category dropdown synced with pills -->
+          <select id="categorySelect" class="select-custom" style="display:none;">
+            <option value="all">Toutes</option>
+          </select>
+
+          <!-- Sorting -->
+          <select id="sortSelect" class="select-custom">
+            <option value="latest" data-i18n="sortLatest">Plus récents</option>
+            <option value="popular" data-i18n="sortPopular">Plus aimés</option>
+            <option value="views" data-i18n="sortViews">Plus consultés</option>
+          </select>
+        </div>
+
+        <!-- Quick Category Pills -->
+        <div class="category-pills" id="categoryPills">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Grid -->
+    <div class="posts-grid" id="postsGrid">
+      <!-- Populated via fetch in app.js -->
+    </div>
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-backdrop" id="postModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" data-i18n="modalCreateTitle">Publier une Opportunité ou Actualité Jeunesse</h3>
+        <button class="btn-close" onclick="closePostModal()">&times;</button>
+      </div>
+
+      <form id="postForm">
+        <input type="hidden" id="postId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="postTitle" data-i18n="fieldTitle">Titre de l'opportunité ou de l'article *</label>
+            <input type="text" id="postTitle" class="form-control" required placeholder="Ex: Concours d'entrée à l'ENS 2026 ou Lancement startup à Buea" data-i18n-placeholder="fieldTitlePlaceholder">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postOppType" data-i18n="fieldOppType">Type d'opportunité *</label>
+              <select id="postOppType" class="form-control" required>
+                <option value="concours">Concours Grandes Écoles</option>
+                <option value="bourse">Bourse & Financement</option>
+                <option value="emploi_stage">Stage, Emploi & Hackathon</option>
+                <option value="story">Success Story / Actualité</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="postCategory" data-i18n="fieldCategory">Catégorie *</label>
+              <select id="postCategory" class="form-control" required>
+                <option value="Opportunités & Bourses">Opportunités & Bourses</option>
+                <option value="Tech & Innovation">Tech & Innovation</option>
+                <option value="Entrepreneuriat">Entrepreneuriat</option>
+                <option value="Pleins feux Jeunesse">Pleins feux Jeunesse</option>
+                <option value="Culture & Arts">Culture & Arts</option>
+                <option value="Sport & Santé">Sport & Santé</option>
+                <option value="Société & Bénévolat">Société & Bénévolat</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postRegion" data-i18n="fieldRegion">Région du Cameroun *</label>
+              <select id="postRegion" class="form-control" required>
+                <option value="National">National (Tout le Cameroun)</option>
+                <option value="Centre (Yaoundé)">Centre (Yaoundé)</option>
+                <option value="Littoral (Douala)">Littoral (Douala)</option>
+                <option value="Sud-Ouest (Buea)">Sud-Ouest (Buea)</option>
+                <option value="Ouest (Bafoussam)">Ouest (Bafoussam)</option>
+                <option value="Nord (Garoua)">Nord (Garoua)</option>
+                <option value="Extrême-Nord (Maroua)">Extrême-Nord (Maroua)</option>
+                <option value="Adamaoua (Ngaoundéré)">Adamaoua (Ngaoundéré)</option>
+                <option value="Nord-Ouest (Bamenda)">Nord-Ouest (Bamenda)</option>
+                <option value="Sud (Ebolowa)">Sud (Ebolowa)</option>
+                <option value="Est (Bertoua)">Est (Bertoua)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="postDeadline" data-i18n="fieldDeadline">Date limite (si applicable)</label>
+              <input type="date" id="postDeadline" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postRemuneration" data-i18n="fieldRemuneration">Montant en FCFA / Bourse</label>
+              <input type="text" id="postRemuneration" class="form-control" placeholder="Ex: 3 000 000 FCFA ou Allocation mensuelle">
+            </div>
+
+            <div class="form-group">
+              <label for="postWhatsApp" data-i18n="fieldWhatsApp">Numéro WhatsApp de contact</label>
+              <input type="text" id="postWhatsApp" class="form-control" placeholder="Ex: +237 670 00 00 00">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="postApplyLink" data-i18n="fieldApplyLink">Lien officiel de candidature ou site</label>
+            <input type="url" id="postApplyLink" class="form-control" placeholder="https://minesup.gov.cm ou https://minjec.gov.cm">
+          </div>
+
+          <div class="form-group">
+            <label for="postSummary" data-i18n="fieldSummary">Résumé / Accroche (1-2 phrases) *</label>
+            <textarea id="postSummary" class="form-control" rows="2" required placeholder="Présentez l'essentiel en quelques mots..." data-i18n-placeholder="fieldSummaryPlaceholder"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="postContent" data-i18n="fieldContent">Contenu complet, critères et étapes à suivre *</label>
+            <textarea id="postContent" class="form-control" rows="5" required placeholder="Détaillez les conditions d'éligibilité, les dates et la procédure..." data-i18n-placeholder="fieldContentPlaceholder"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postAuthorName" data-i18n="fieldAuthorName">Auteur / Organisation *</label>
+              <input type="text" id="postAuthorName" class="form-control" required placeholder="Ex: Samuel Eto'o Junior ou MINJEC">
+            </div>
+
+            <div class="form-group">
+              <label for="postAuthorRole" data-i18n="fieldAuthorRole">Rôle / Ville</label>
+              <input type="text" id="postAuthorRole" class="form-control" placeholder="Ex: Jeune Entrepreneur - Douala">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="postImageUrl" data-i18n="fieldImage">Image de couverture (URL ou fichier)</label>
+            <input type="url" id="postImageUrl" class="form-control" placeholder="https://images.unsplash.com/..." data-i18n-placeholder="fieldImageUrlPlaceholder">
+            <div style="margin-top: 6px;">
+              <small data-i18n="uploadOrUrl" style="color: var(--text-secondary); font-weight: 500;">Ou télécharger une image :</small>
+              <input type="file" id="postImageFile" accept="image/*" class="form-control" style="padding: 0.35rem; margin-top: 4px;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="postTags" data-i18n="fieldTags">Mots-clés (séparés par des virgules)</label>
+            <input type="text" id="postTags" class="form-control" placeholder="Concours, ENS, Yaounde, Bourse" data-i18n-placeholder="fieldTagsPlaceholder">
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="postFeatured">
+              <span data-i18n="fieldFeatured">Mettre en vedette (Highlight sur la page d'accueil)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closePostModal()" data-i18n="btnCancel">Annuler</button>
+          <button type="submit" class="btn-primary" id="modalSubmitBtn" data-i18n="btnSubmitCreate">Publier l'actualité</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 data-i18n="confirmDeleteTitle">Confirmer la suppression</h3>
+        <button class="btn-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p data-i18n="confirmDeleteMsg" style="color: var(--text-secondary);">Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeDeleteModal()" data-i18n="btnCancel">Annuler</button>
+        <button type="button" class="btn-danger" onclick="confirmDeletePost()" data-i18n="btnConfirmDelete">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="brand-wrapper">
+          <img src="/static/images/logo.svg" alt="Actujeune 🇨🇲" style="height: 38px; width: auto;" />
+        </div>
+
+        <div>
+          <button class="btn-primary" onclick="openCreateModal()">
+            <span data-i18n="postNewBtn">+ Publier une opportunité</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span data-i18n="proudlyCameroon">Le fer de lance de la nation 🇨🇲 Fièrement conçu pour la jeunesse du Cameroun</span>
+        <span>&copy; 2026 Actujeune. <span data-i18n="footerCopy">Tous droits réservés.</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

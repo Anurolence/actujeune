@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ post.title }} - Actujeune 🇨🇲</title>
+  <meta name="description" content="{{ post.summary }}">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/images/icon.svg">
+</head>
+<body>
+
+  <!-- Cameroon Flag Tricolor Top Banner -->
+  <div class="flag-banner">
+    <div class="green"></div>
+    <div class="red"></div>
+    <div class="yellow"></div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="/" class="brand-wrapper" title="Actujeune - La Voix de la Jeunesse 237">
+        <img src="/static/images/logo.svg" alt="Actujeune 🇨🇲" style="height: 46px; width: auto; max-width: 220px;" />
+      </a>
+
+      <div class="nav-actions">
+        <!-- Dark Mode Toggle -->
+        <button id="btnThemeToggle" class="btn-theme-toggle" aria-label="Mode sombre / clair" title="Mode sombre / clair">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <!-- Low Data Mode Toggle -->
+        <button id="btnDataSaver" class="btn-data-saver">
+          <span>📶</span>
+          <span data-i18n="dataSaverToggle">Mode Éco (Mo)</span>
+        </button>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+          <button id="btnLangFr" class="lang-btn active">FR</button>
+          <button id="btnLangEn" class="lang-btn">EN</button>
+        </div>
+
+        <a href="/" class="btn-secondary">
+          <span>&larr;</span>
+          <span data-i18n="clearFilters">Retour aux actualités</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Detail Container -->
+  <main class="detail-container">
+    <a href="/" class="btn-back">
+      <span>&larr;</span>
+      <span>Retour à la liste des publications</span>
+    </a>
+
+    <article class="detail-article">
+      {% if post.image_url %}
+      <img src="{{ post.image_url }}" alt="{{ post.title }}" class="detail-hero-img" onerror="this.style.display='none'">
+      {% endif %}
+
+      <div class="detail-content-wrap">
+        <div class="detail-header">
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap;">
+            {% if post.is_featured %}
+            <span class="badge-featured" data-i18n="featuredBadge">⭐ En Vedette</span>
+            {% endif %}
+
+            {% if post.opportunity_type == 'concours' %}
+            <span class="badge-opp-type badge-opp-concours" data-i18n="oppTypeConcours">Concours Grandes Écoles</span>
+            {% elif post.opportunity_type == 'bourse' %}
+            <span class="badge-opp-type badge-opp-bourse" data-i18n="oppTypeBourse">Bourse & Financement</span>
+            {% elif post.opportunity_type == 'emploi_stage' %}
+            <span class="badge-opp-type badge-opp-emploi" data-i18n="oppTypeEmploi">Stage & Emploi</span>
+            {% else %}
+            <span class="badge-opp-type badge-opp-story" data-i18n="oppTypeStory">Success Story</span>
+            {% endif %}
+
+            <span class="badge-category">{{ post.category }}</span>
+            <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">📍 {{ post.region }}</span>
+          </div>
+
+          <h1 class="detail-title">{{ post.title }}</h1>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <div class="author-avatar" style="width: 34px; height: 34px; font-size: 0.85rem;">
+                {{ post.author_name[:2].upper() }}
+              </div>
+              <div>
+                <strong style="color: var(--text-primary); font-size: 0.95rem;">{{ post.author_name }}</strong>
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary);">{{ post.author_role or 'Jeune Reporter' }}</span>
+              </div>
+            </div>
+
+            <div>
+              <span>📅 {{ post.created_at[:10] }}</span> &middot;
+              <span>👁️ {{ post.views_count }} <span data-i18n="views">vues</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opportunity Box for Cameroonian Youths (Deadline, FCFA, WhatsApp, Link) -->
+        {% if post.deadline or post.remuneration_fcfa or post.contact_whatsapp or post.apply_link %}
+        <div class="opportunity-meta-box">
+          {% if post.deadline %}
+          <div class="opp-meta-item">
+            <span class="opp-meta-label" data-i18n="labelDeadline">Date limite</span>
+            <span class="opp-meta-value" style="color: var(--cm-red);">⏰ {{ post.deadline }}</span>
+          </div>
+          {% endif %}
+
+          {% if post.remuneration_fcfa %}
+          <div class="opp-meta-item">
+            <span class="opp-meta-label" data-i18n="labelRemuneration">Montant / Bourse</span>
+            <span class="opp-meta-value price">💰 {{ post.remuneration_fcfa }}</span>
+          </div>
+          {% endif %}
+
+          {% if post.contact_whatsapp %}
+          <div class="opp-meta-item">
+            <span class="opp-meta-label" data-i18n="labelContactWhatsApp">Contact WhatsApp</span>
+            <a href="https://api.whatsapp.com/send?phone={{ post.contact_whatsapp|replace(' ', '')|replace('+', '') }}&text=Bonjour,%20je%20vous%20contacte%20depuis%20Actujeune%20au%20sujet%20de%20:%20{{ post.title }}" target="_blank" class="btn-whatsapp" style="padding: 4px 10px; font-size: 0.8rem; margin-top: 2px;">
+              <span>💬</span>
+              <span>{{ post.contact_whatsapp }}</span>
+            </a>
+          </div>
+          {% endif %}
+
+          {% if post.apply_link %}
+          <div class="opp-meta-item">
+            <span class="opp-meta-label" data-i18n="labelApplyLink">Lien Officiel</span>
+            <a href="{{ post.apply_link }}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="padding: 4px 12px; font-size: 0.8rem; margin-top: 2px;">
+              <span data-i18n="btnApplyNow">Postuler / En savoir plus &rarr;</span>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="detail-lead">
+          {{ post.summary }}
+        </div>
+
+        <div class="detail-body">
+          {{ post.content }}
+        </div>
+
+        {% if post.tags %}
+        <div class="post-tags" style="margin: 1.5rem 0;">
+          {% for tag in post.tags.split(',') %}
+          <span class="post-tag">#{{ tag.strip() }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Detail Actions Toolbar -->
+        <div class="detail-toolbar">
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn-secondary" id="btnLikeDetail" onclick="toggleDetailLike({{ post.id }})">
+              <span>❤️</span>
+              <span id="detailLikesCount">{{ post.likes_count }}</span>
+              <span data-i18n="like">J'aime</span>
+            </button>
+
+            <!-- Direct WhatsApp Share Button (Vital for Cameroon Youth) -->
+            <button class="btn-whatsapp" onclick="shareWhatsAppDetail()">
+              <span>💬</span>
+              <span data-i18n="btnWhatsAppShare">Partager sur WhatsApp</span>
+            </button>
+
+            <button class="btn-secondary" onclick="shareDetailPost()">
+              <span>🔗</span>
+              <span data-i18n="share">Copier le lien</span>
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-secondary" onclick="openDetailEditModal()">
+              <span>✏️</span>
+              <span data-i18n="edit">Modifier</span>
+            </button>
+            <button class="btn-danger" onclick="openDetailDeleteModal()">
+              <span>🗑️</span>
+              <span data-i18n="delete">Supprimer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Comments Section -->
+        <section class="comments-section" id="comments">
+          <h3 class="comments-header">
+            <span>💬</span>
+            <span data-i18n="commentsTitle">Commentaires & Réactions</span>
+            <span style="font-size: 0.9rem; color: var(--text-muted);" id="commentsCountLabel">({{ comments|length }})</span>
+          </h3>
+
+          <!-- Comment Form -->
+          <form class="comment-form" id="commentForm">
+            <h4 data-i18n="leaveComment" style="font-size: 0.95rem; font-weight: 700;">Laisser un commentaire</h4>
+            <div class="form-group">
+              <input type="text" id="commentAuthor" class="form-control" required placeholder="Votre nom ou pseudonyme (ex: Yannick - Buea)" data-i18n-placeholder="commentNamePlaceholder">
+            </div>
+            <div class="form-group">
+              <textarea id="commentContent" class="form-control" rows="3" required placeholder="Partagez vos impressions ou vos encouragements..." data-i18n-placeholder="commentContentPlaceholder"></textarea>
+            </div>
+            <div>
+              <button type="submit" class="btn-primary" id="btnSubmitComment">
+                <span data-i18n="btnSendComment">Envoyer le commentaire</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Comment List -->
+          <div class="comment-list" id="commentsList">
+            {% if comments %}
+              {% for comment in comments %}
+              <div class="comment-item">
+                <div class="comment-meta">
+                  <span class="comment-author">{{ comment.author_name }}</span>
+                  <span>{{ comment.created_at[:16] }}</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;" id="noCommentsMsg" data-i18n="noCommentsYet">Soyez le premier à commenter cette publication !</p>
+            {% endif %}
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-backdrop" id="postModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" data-i18n="modalEditTitle">Modifier la publication</h3>
+        <button class="btn-close" onclick="closePostModal()">&times;</button>
+      </div>
+
+      <form id="postForm">
+        <input type="hidden" id="postId" value="{{ post.id }}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="postTitle" data-i18n="fieldTitle">Titre de l'article *</label>
+            <input type="text" id="postTitle" class="form-control" required value="{{ post.title }}">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postOppType" data-i18n="fieldOppType">Type d'opportunité *</label>
+              <select id="postOppType" class="form-control" required>
+                <option value="concours" {% if post.opportunity_type == 'concours' %}selected{% endif %}>Concours Grandes Écoles</option>
+                <option value="bourse" {% if post.opportunity_type == 'bourse' %}selected{% endif %}>Bourse & Financement</option>
+                <option value="emploi_stage" {% if post.opportunity_type == 'emploi_stage' %}selected{% endif %}>Stage & Emploi</option>
+                <option value="story" {% if post.opportunity_type == 'story' %}selected{% endif %}>Success Story / Actualité</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="postCategory" data-i18n="fieldCategory">Catégorie *</label>
+              <select id="postCategory" class="form-control" required>
+                <option value="Opportunités & Bourses" {% if post.category == 'Opportunités & Bourses' %}selected{% endif %}>Opportunités & Bourses</option>
+                <option value="Tech & Innovation" {% if post.category == 'Tech & Innovation' %}selected{% endif %}>Tech & Innovation</option>
+                <option value="Entrepreneuriat" {% if post.category == 'Entrepreneuriat' %}selected{% endif %}>Entrepreneuriat</option>
+                <option value="Pleins feux Jeunesse" {% if post.category == 'Pleins feux Jeunesse' %}selected{% endif %}>Pleins feux Jeunesse</option>
+                <option value="Culture & Arts" {% if post.category == 'Culture & Arts' %}selected{% endif %}>Culture & Arts</option>
+                <option value="Sport & Santé" {% if post.category == 'Sport & Santé' %}selected{% endif %}>Sport & Santé</option>
+                <option value="Société & Bénévolat" {% if post.category == 'Société & Bénévolat' %}selected{% endif %}>Société & Bénévolat</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postRegion" data-i18n="fieldRegion">Région du Cameroun *</label>
+              <select id="postRegion" class="form-control" required>
+                <option value="National" {% if post.region == 'National' %}selected{% endif %}>National (Tout le Cameroun)</option>
+                <option value="Centre (Yaoundé)" {% if post.region == 'Centre (Yaoundé)' %}selected{% endif %}>Centre (Yaoundé)</option>
+                <option value="Littoral (Douala)" {% if post.region == 'Littoral (Douala)' %}selected{% endif %}>Littoral (Douala)</option>
+                <option value="Sud-Ouest (Buea)" {% if post.region == 'Sud-Ouest (Buea)' %}selected{% endif %}>Sud-Ouest (Buea)</option>
+                <option value="Ouest (Bafoussam)" {% if post.region == 'Ouest (Bafoussam)' %}selected{% endif %}>Ouest (Bafoussam)</option>
+                <option value="Nord (Garoua)" {% if post.region == 'Nord (Garoua)' %}selected{% endif %}>Nord (Garoua)</option>
+                <option value="Extrême-Nord (Maroua)" {% if post.region == 'Extrême-Nord (Maroua)' %}selected{% endif %}>Extrême-Nord (Maroua)</option>
+                <option value="Adamaoua (Ngaoundéré)" {% if post.region == 'Adamaoua (Ngaoundéré)' %}selected{% endif %}>Adamaoua (Ngaoundéré)</option>
+                <option value="Nord-Ouest (Bamenda)" {% if post.region == 'Nord-Ouest (Bamenda)' %}selected{% endif %}>Nord-Ouest (Bamenda)</option>
+                <option value="Sud (Ebolowa)" {% if post.region == 'Sud (Ebolowa)' %}selected{% endif %}>Sud (Ebolowa)</option>
+                <option value="Est (Bertoua)" {% if post.region == 'Est (Bertoua)' %}selected{% endif %}>Est (Bertoua)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="postDeadline" data-i18n="fieldDeadline">Date limite</label>
+              <input type="date" id="postDeadline" class="form-control" value="{{ post.deadline or '' }}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postRemuneration" data-i18n="fieldRemuneration">Montant en FCFA / Bourse</label>
+              <input type="text" id="postRemuneration" class="form-control" value="{{ post.remuneration_fcfa or '' }}">
+            </div>
+
+            <div class="form-group">
+              <label for="postWhatsApp" data-i18n="fieldWhatsApp">Contact WhatsApp</label>
+              <input type="text" id="postWhatsApp" class="form-control" value="{{ post.contact_whatsapp or '' }}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="postApplyLink" data-i18n="fieldApplyLink">Lien officiel de candidature</label>
+            <input type="url" id="postApplyLink" class="form-control" value="{{ post.apply_link or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="postSummary" data-i18n="fieldSummary">Résumé / Accroche *</label>
+            <textarea id="postSummary" class="form-control" rows="2" required>{{ post.summary }}</textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="postContent" data-i18n="fieldContent">Contenu complet de l'article *</label>
+            <textarea id="postContent" class="form-control" rows="6" required>{{ post.content }}</textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postAuthorName" data-i18n="fieldAuthorName">Auteur / Nom *</label>
+              <input type="text" id="postAuthorName" class="form-control" required value="{{ post.author_name }}">
+            </div>
+
+            <div class="form-group">
+              <label for="postAuthorRole" data-i18n="fieldAuthorRole">Rôle / Ville</label>
+              <input type="text" id="postAuthorRole" class="form-control" value="{{ post.author_role or '' }}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="postImageUrl" data-i18n="fieldImage">Image de couverture URL</label>
+            <input type="url" id="postImageUrl" class="form-control" value="{{ post.image_url or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="postTags" data-i18n="fieldTags">Mots-clés</label>
+            <input type="text" id="postTags" class="form-control" value="{{ post.tags or '' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="postFeatured" {% if post.is_featured %}checked{% endif %}>
+              <span data-i18n="fieldFeatured">Mettre en vedette (Highlight)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closePostModal()" data-i18n="btnCancel">Annuler</button>
+          <button type="submit" class="btn-primary" id="modalSubmitBtn" data-i18n="btnSubmitUpdate">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 data-i18n="confirmDeleteTitle">Confirmer la suppression</h3>
+        <button class="btn-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p data-i18n="confirmDeleteMsg" style="color: var(--text-secondary);">Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeDeleteModal()" data-i18n="btnCancel">Annuler</button>
+        <button type="button" class="btn-danger" onclick="confirmDeleteDetail({{ post.id }})" data-i18n="btnConfirmDelete">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-bottom" style="border:none; padding-top:0;">
+        <span data-i18n="proudlyCameroon">Le fer de lance de la nation 🇨🇲 Fièrement conçu pour la jeunesse du Cameroun</span>
+        <span>&copy; 2026 Actujeune. <span data-i18n="footerCopy">Tous droits réservés.</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/i18n.js"></script>
+  <script>
+    let currentLang = localStorage.getItem("actujeune_lang") || "fr";
+    let clientId = localStorage.getItem("actujeune_client_id");
+    if (!clientId) {
+      clientId = "usr_" + Math.random().toString(36).substring(2, 12) + "_" + Date.now();
+      localStorage.setItem("actujeune_client_id", clientId);
+    }
+
+    let isDataSaver = localStorage.getItem("actujeune_data_saver") === "true";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+      initLanguageSwitcher();
+      initDataSaver();
+      applyLanguage(currentLang);
+      setupComments();
+      setupEditForm();
+    });
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem("actujeune_theme") || "light";
+      applyTheme(savedTheme);
+      const toggleBtn = document.getElementById("btnThemeToggle");
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          const current = document.documentElement.getAttribute("data-theme") || "light";
+          const next = current === "dark" ? "light" : "dark";
+          applyTheme(next);
+          localStorage.setItem("actujeune_theme", next);
+        });
+      }
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      const icon = document.getElementById("themeIcon");
+      if (icon) icon.textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+
+    function initDataSaver() {
+      const toggleBtn = document.getElementById("btnDataSaver");
+      if (isDataSaver) {
+        document.body.classList.add("data-saver-mode");
+        if (toggleBtn) toggleBtn.classList.add("active");
+      }
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          isDataSaver = !isDataSaver;
+          localStorage.setItem("acujeune_data_saver", isDataSaver);
+          document.body.classList.toggle("data-saver-mode", isDataSaver);
+          toggleBtn.classList.toggle("active", isDataSaver);
+          showToast(isDataSaver ? t('dataSaverActive') : "Mode standard activé", "info");
+        });
+      }
+    }
+
+    function initLanguageSwitcher() {
+      const frBtn = document.getElementById("btnLangFr");
+      const enBtn = document.getElementById("btnLangEn");
+      if (frBtn && enBtn) {
+        frBtn.addEventListener("click", () => setLanguage("fr"));
+        enBtn.addEventListener("click", () => setLanguage("en"));
+      }
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem("acujeune_lang", lang);
+      applyLanguage(lang);
+    }
+
+    function t(key) {
+      const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.fr;
+      return dict[key] || key;
+    }
+
+    function applyLanguage(lang) {
+      const frBtn = document.getElementById("btnLangFr");
+      const enBtn = document.getElementById("btnLangEn");
+      if (frBtn && enBtn) {
+        frBtn.classList.toggle("active", lang === "fr");
+        enBtn.classList.toggle("active", lang === "en");
+      }
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (key && TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+          el.textContent = TRANSLATIONS[lang][key];
+        }
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (key && TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+          el.setAttribute("placeholder", TRANSLATIONS[lang][key]);
+        }
+      });
+    }
+
+    // WhatsApp Share for Post Detail
+    function shareWhatsAppDetail() {
+      const title = "{{ post.title|replace('\"', '\\\"')|replace('\'', '\\\'') }}";
+      const url = window.location.href;
+      const text = encodeURIComponent("🇨🇲 *" + title + "* sur Actujeune (Actualités & Opportunités Jeunesse Cameroun) :\n" + url);
+      window.open("https://api.whatsapp.com/send?text=" + text, "_blank");
+    }
+
+    // Like toggle
+    async function toggleDetailLike(postId) {
+      try {
+        const formData = new FormData();
+        formData.append("client_id", clientId);
+        const res = await fetch(`/api/posts/${postId}/like`, {
+          method: "POST",
+          body: formData
+        });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById("detailLikesCount").textContent = data.likes_count;
+          const btn = document.getElementById("btnLikeDetail");
+          btn.classList.toggle("btn-danger", data.has_liked);
+          showToast(data.has_liked ? "❤️ " + t('liked') : "💔", "info");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function shareDetailPost() {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          showToast(t('linkCopied'), "success");
+        });
+      } else {
+        prompt("Copiez ce lien / Copy link:", window.location.href);
+      }
+    }
+
+    // Comment submission
+    function setupComments() {
+      const form = document.getElementById("commentForm");
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const authorInput = document.getElementById("commentAuthor");
+        const contentInput = document.getElementById("commentContent");
+        const btn = document.getElementById("btnSubmitComment");
+
+        const payload = {
+          author_name: authorInput.value.trim(),
+          content: contentInput.value.trim()
+        };
+
+        try {
+          btn.disabled = true;
+          const res = await fetch(`/api/posts/{{ post.id }}/comments`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) throw new Error("Error submitting comment");
+          const newComment = await res.json();
+
+          const list = document.getElementById("commentsList");
+          const emptyMsg = document.getElementById("noCommentsMsg");
+          if (emptyMsg) emptyMsg.remove();
+
+          const item = document.createElement("div");
+          item.className = "comment-item";
+          item.innerHTML = `
+            <div class="comment-meta">
+              <span class="comment-author">${escapeHtml(newComment.author_name)}</span>
+              <span>${newComment.created_at.substring(0, 16)}</span>
+            </div>
+            <p class="comment-text">${escapeHtml(newComment.content)}</p>
+          `;
+          list.prepend(item);
+
+          contentInput.value = "";
+          showToast(currentLang === "fr" ? "Commentaire ajouté !" : "Comment posted!", "success");
+        } catch (err) {
+          console.error(err);
+          showToast("Erreur lors de l'envoi du commentaire", "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+
+    // Edit modal
+    function openDetailEditModal() {
+      document.getElementById("postModal").classList.add("show");
+    }
+    function closePostModal() {
+      document.getElementById("postModal").classList.remove("show");
+    }
+    function openDetailDeleteModal() {
+      document.getElementById("deleteModal").classList.add("show");
+    }
+    function closeDeleteModal() {
+      document.getElementById("deleteModal").classList.remove("show");
+    }
+
+    function setupEditForm() {
+      const form = document.getElementById("postForm");
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const payload = {
+          title: document.getElementById("postTitle").value.trim(),
+          summary: document.getElementById("postSummary").value.trim(),
+          content: document.getElementById("postContent").value.trim(),
+          category: document.getElementById("postCategory").value,
+          region: document.getElementById("postRegion").value,
+          opportunity_type: document.getElementById("postOppType").value,
+          deadline: document.getElementById("postDeadline").value.trim() || null,
+          remuneration_fcfa: document.getElementById("postRemuneration").value.trim() || null,
+          contact_whatsapp: document.getElementById("postWhatsApp").value.trim() || null,
+          apply_link: document.getElementById("postApplyLink").value.trim() || null,
+          author_name: document.getElementById("postAuthorName").value.trim(),
+          author_role: document.getElementById("postAuthorRole").value.trim(),
+          image_url: document.getElementById("postImageUrl").value.trim() || null,
+          tags: document.getElementById("postTags").value.trim() || null,
+          is_featured: document.getElementById("postFeatured").checked ? 1 : 0
+        };
+
+        try {
+          const res = await fetch(`/api/posts/{{ post.id }}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            showToast("Article mis à jour !", "success");
+            setTimeout(() => window.location.reload(), 800);
+          } else {
+            showToast("Erreur de mise à jour", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Network error", "error");
+        }
+      });
+    }
+
+    async function confirmDeleteDetail(postId) {
+      try {
+        const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Article supprimé !", "success");
+          setTimeout(() => window.location.href = "/", 800);
+        } else {
+          showToast("Error deleting", "error");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
