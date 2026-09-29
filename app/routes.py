@@ -1,34 +1,30 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-import os
+from fastapi import APIRouter
+from app import crud
+from app.models import PostCreate
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-
-@router.get("/api/health")
+@router.get("/health")
 def health():
-    return {"status": "ok", "app": "ActuJeune LIVE"}
+    return {"status": "ok"}
 
-@router.get("/api/posts")
+@router.get("/posts")
 def get_posts():
     try:
-        from app.database import get_db_connection
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM posts ORDER BY created_at DESC LIMIT 50")
-        posts = [dict(row) for row in cur.fetchall()]
-        conn.close()
-        return posts
+        return crud.get_posts()
     except Exception as e:
-        return {"error": str(e), "posts": []}
+        return {"posts": [], "error": str(e)}
 
-@router.get("/{full_path:path}", response_class=HTMLResponse)
-def serve_frontend(full_path: str):
-    # Serve index.html for frontend routing
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        with open(index_path, "r", encoding="utf-8") as f:
-            return f.read()
-    return "<h1>ActuJeune LIVE</h1><p>Frontend not built yet</p><a href='/docs'>API Docs</a>"
+@router.get("/posts/{post_id}")
+def get_post(post_id: int):
+    try:
+        return crud.get_post(post_id)
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.post("/posts")
+def create_post(post: PostCreate):
+    try:
+        return crud.create_post(post)
+    except Exception as e:
+        return {"error": str(e)}
