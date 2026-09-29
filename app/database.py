@@ -1,30 +1,32 @@
-import sqlite3, os
-IS_VERCEL = os.environ.get("VERCEL") == "1" or os.path.exists("/var/task")
-DB_PATH = "/tmp/actujeune.db" if IS_VERCEL else os.path.join(os.path.dirname(__file__), "actujeune.db")
-def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+# Vercel's filesystem is read-only except /tmp
+if os.path.exists("/var/task"):
+    # On Vercel - use /tmp
+    DB_PATH = "/tmp/actujeune.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "..", "actujeune.db")
+
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+print(f"DB URL: {SQLALCHEMY_DATABASE_URL}")
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
 def get_db():
-    return get_db_connection()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 def init_db():
-    if os.path.exists(DB_PATH):
-        try: os.remove(DB_PATH)
-        except: pass
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""CREATE TABLE posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT, content TEXT, summary TEXT,
-        category TEXT, region TEXT,
-        author TEXT, author_role TEXT,
-        image_url TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        views INTEGER DEFAULT 0, slug TEXT,
-        status TEXT DEFAULT 'published', featured INTEGER DEFAULT 0
-    )""")
-    cur.execute("CREATE TABLE categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)")
-    cur.execute("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)")
-    cur.execute("CREATE TABLE comments (id INTEGER PRIMARY KEY AUTOINCREMENT, post_id INTEGER, content TEXT, author TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-    conn.commit()
-    conn.close()
-    print("DB OK")
+    try:
+        Base.metadata.create_all(bind=engine)
+        print(f"DB created at {DB_PATH}")
+    except Exception as e:
+        print(f"DB init error: {e}")
+        raise
