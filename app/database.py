@@ -1,7 +1,6 @@
 import sqlite3
 import os
 
-# Vercel needs writable /tmp
 IS_VERCEL = os.environ.get("VERCEL") == "1" or os.path.exists("/var/task")
 DB_PATH = "/tmp/actujeune.db" if IS_VERCEL else os.path.join(os.path.dirname(__file__), "actujeune.db")
 
@@ -10,10 +9,13 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# ALIAS for compatibility - your code uses get_db
+def get_db():
+    return get_db_connection()
+
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    # Recreate tables if missing - safe for Vercel
     cur.execute("""
     CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +34,6 @@ def init_db():
         name TEXT UNIQUE NOT NULL
     )
     """)
-    # Add other tables if you have them - this ensures seed won't crash
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
