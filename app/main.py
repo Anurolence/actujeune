@@ -37,7 +37,15 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.on_event("startup")
 def on_startup():
-    init_db()
+    try:
+        init_db()
+    except Exception as e:
+        print(f'init_db error: {e}')
+    try:
+        seed_database()
+    except:
+        pass
+    # original seed
     seed_database()
 
 # ----------------- PAGE ROUTES ----------------- #

@@ -1,44 +1,48 @@
-"""Database connection using SQLite - Vercel compatible."""
-import os
 import sqlite3
-from contextlib import contextmanager
+import os
 
-# Vercel is read-only, use /tmp which is writable
-DB_PATH = "/tmp/acujeune.db"
+# Vercel needs writable /tmp
+IS_VERCEL = os.environ.get("VERCEL") == "1" or os.path.exists("/var/task")
+DB_PATH = "/tmp/actujeune.db" if IS_VERCEL else os.path.join(os.path.dirname(__file__), "actujeune.db")
 
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-@contextmanager
-def get_db():
+def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = dict_factory
-    conn.execute("PRAGMA foreign_keys = ON")
-    try:
-        yield conn
-        conn.commit()
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
-    """Initializes tables if they do not exist and runs migrations"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        # keep your existing table creation here - paste your old init_db body below
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        # ADD your other CREATE TABLE IF NOT EXISTS here if you had them
-        conn.commit()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # Recreate tables if missing - safe for Vercel
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        category TEXT,
+        author TEXT,
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        views INTEGER DEFAULT 0
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL
+    )
+    """)
+    # Add other tables if you have them - this ensures seed won't crash
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
+    print(f"DB initialized at {DB_PATH}")
+
+if __name__ == "__main__":
+    init_db()
