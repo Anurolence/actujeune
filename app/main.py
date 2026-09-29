@@ -16,9 +16,12 @@ from app.models import PostCreate, PostUpdate, PostResponse, PostDetailResponse,
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
-UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads")
+UPLOADS_DIR = "/tmp/uploads" if os.environ.get("VERCEL") else os.path.join(STATIC_DIR, "uploads")
 
-os.makedirs(UPLOADS_DIR, exist_ok=True)
+try:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+except Exception:
+    pass
 
 app = FastAPI(
     title="Actujeune",
