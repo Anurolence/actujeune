@@ -40,10 +40,17 @@ def on_startup():
     try:
         from app.database import init_db
         init_db()
+        print("init_db OK")
     except Exception as e:
         print(f"init_db failed: {e}")
     try:
         seed_database()
+        print("seed OK")
+    except Exception as e:
+        print(f"seed failed: {e}")
+        import traceback
+        traceback.print_exc()
+
     except Exception as e:
         print(f"seed failed: {e}")
     except:
